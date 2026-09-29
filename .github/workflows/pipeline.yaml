@@ -31,3 +31,24 @@ jobs:
       - uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-staging:
+    needs: [test, secret-scan]
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - run: echo "Deploying to staging with ${PAYMENTS_API_KEY:0:3}*** (masked by Actions)"
+        env:
+          PAYMENTS_API_KEY: ${{ secrets.PAYMENTS_API_KEY }}
+
+  deploy-production:
+    needs: [test, secret-scan]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - run: echo "Deploying to production"
+        env:
+          PAYMENTS_API_KEY: ${{ secrets.PAYMENTS_API_KEY }}
